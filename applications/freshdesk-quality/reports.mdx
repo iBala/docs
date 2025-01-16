@@ -1,0 +1,75 @@
+---
+title: 'Reports & Analytics'
+description: 'Monitor and analyze your customer service quality'
+---
+
+# Quality Assessment Reports
+
+Track and analyze your customer service performance.
+
+## Available Reports
+
+<CardGroup cols={2}>
+  <Card title="Quality Scores" icon="star">
+    Overall and per-category quality metrics
+  </Card>
+  <Card title="Agent Performance" icon="user">
+    Individual agent quality trends
+  </Card>
+  <Card title="Trend Analysis" icon="chart-line">
+    Quality metrics over time
+  </Card>
+  <Card title="Category Breakdown" icon="folder-tree">
+    Performance by ticket category
+  </Card>
+</CardGroup>
+
+## Analysis Features
+
+<Steps>
+  <Step title="View Reports">
+    Access comprehensive analytics:
+    - Quality scores
+    - Performance trends
+    - Agent metrics
+    - Category analysis
+  </Step>
+
+  <Step title="Filter Data">
+    Available filters:
+    - Date range
+    - Agents
+    - Categories
+    - Teams
+  </Step>
+
+  <Step title="Export Results">
+    Export options:
+    - CSV for spreadsheets
+    - PDF for presentations
+    - API for integration
+  </Step>
+</Steps>
+
+## Sample Report
+
+<CodeGroup>
+```json Quality Report
+{
+  "period": "2024-01",
+  "overall_score": 92.5,
+  "total_tickets": 1250,
+  "categories": {
+    "communication": 94.2,
+    "technical_accuracy": 91.8,
+    "resolution_time": 89.5
+  },
+  "trends": {
+    "improvement_areas": [
+      "First response time",
+      "Solution documentation"
+    ]
+  }
+}
+```
+</CodeGroup> 

@@ -1,0 +1,70 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Freshdesk Quality Assistant API",
+    "description": "API for analyzing customer service ticket quality",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.example.com",
+      "description": "Production server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "API key for authentication"
+      }
+    }
+  },
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/api/cs-qa/v1/verify": {
+      "post": {
+        "summary": "Test Connection",
+        "description": "Test endpoint to verify API connectivity and authentication",
+        "responses": {
+          "200": {
+            "description": "Connection successful"
+          }
+        }
+      }
+    },
+    "/api/cs-qa/v1/analyze": {
+      "post": {
+        "summary": "Analyze Tickets",
+        "description": "Analyze a batch of customer service tickets",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Analysis started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyzeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+} 

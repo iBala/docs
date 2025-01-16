@@ -1,0 +1,71 @@
+---
+title: 'Best Practices'
+description: 'Tips and tricks for optimal extraction results'
+---
+
+# Best Practices
+
+Follow these guidelines to get the best results from the Image Extractor.
+
+## Document Preparation
+
+<CardGroup cols={2}>
+  <Card title="Image Quality" icon="image">
+    - Use clear, high-resolution scans
+    - Ensure good lighting and contrast
+    - Avoid blurry or skewed images
+  </Card>
+  <Card title="File Format" icon="file">
+    - Prefer PDF for multi-page documents
+    - Use PNG/JPEG for single-page items
+    - Keep file size under 10MB
+  </Card>
+</CardGroup>
+
+## Template Configuration
+
+### Field Naming
+- Use clear, descriptive names
+- Follow a consistent naming convention
+- Avoid special characters
+
+### Field Descriptions
+- Be specific about data location
+- Include format expectations
+- Mention common variations
+
+<CodeGroup>
+```json Good Example
+{
+  "field": "invoice_date",
+  "description": "Date in top right corner, format: MM/DD/YYYY or DD-MM-YYYY"
+}
+```
+
+```json Bad Example
+{
+  "field": "date",
+  "description": "The date on the document"
+}
+```
+</CodeGroup>
+
+## Processing Tips
+
+<Steps>
+  <Step title="Test First">
+    Always test new templates with a single document before batch processing
+  </Step>
+  
+  <Step title="Review Results">
+    Check extraction accuracy and adjust templates as needed
+  </Step>
+  
+  <Step title="Monitor Performance">
+    Track success rates and common errors
+  </Step>
+</Steps>
+
+<Note>
+Remember to regularly update your templates based on performance data and document changes.
+</Note> 

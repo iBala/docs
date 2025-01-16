@@ -1,0 +1,24 @@
+---
+title: 'Check Batch Status'
+openapi: 'GET /api/cs-qa/v1/status/{batch_id}'
+description: 'Get the status and results of a batch analysis request'
+---
+
+Check the processing status and retrieve results for a batch of analyzed tickets.
+
+<RequestExample>
+```bash cURL
+curl https://api.example.com/api/cs-qa/v1/status/batch-123 \
+  -H "Authorization: YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    "https://api.example.com/api/cs-qa/v1/status/batch-123",
+    headers={"Authorization": "YOUR_API_KEY"}
+)
+print(response.json())
+```
+</RequestExample> 

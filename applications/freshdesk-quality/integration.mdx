@@ -1,0 +1,59 @@
+---
+title: 'Integration Setup'
+description: 'Connect CS-QA with your Freshdesk account'
+---
+
+# Freshdesk Integration
+
+Learn how to connect CS-QA with your Freshdesk helpdesk.
+
+## Setup Process
+
+<Steps>
+  <Step title="Configure Connection">
+    Required information:
+    - Freshdesk domain
+    - API credentials
+    - Ticket categories
+    - Field mappings
+  </Step>
+
+  <Step title="Map Fields">
+    <CodeGroup>
+    ```json Field Mapping
+    {
+      "ticket_fields": {
+        "subject": "title",
+        "description": "content",
+        "priority": "priority_level",
+        "status": "ticket_status",
+        "agent_id": "assignee"
+      },
+      "custom_fields": {
+        "category": "ticket_category",
+        "team": "support_team"
+      }
+    }
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Test Integration">
+    Verify your setup:
+    - Run test assessments
+    - Check field mapping
+    - Validate scoring
+    - Review results
+  </Step>
+</Steps>
+
+## Workflow Integration
+
+<CardGroup cols={2}>
+  <Card title="Automatic Assessment" icon="robot">
+    Tickets evaluated as they're resolved
+  </Card>
+  <Card title="Manual Review" icon="user">
+    Option to review and adjust scores
+  </Card>
+</CardGroup> 

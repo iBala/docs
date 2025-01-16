@@ -1,0 +1,112 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Image Extraction API",
+    "description": "Extract structured data from images and PDFs\n\nFor authentication, provide your API key in the Authorization header:\n```\nAuthorization: YOUR_API_KEY\n```\n",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/extractor/v1/extract": {
+      "post": {
+        "tags": ["extractor"],
+        "summary": "Extract Information from Document",
+        "description": "Extract structured information from documents (PDF or images).\n\n**Features:**\n* Supports PDF and image files (jpg, jpeg, png)\n* Accepts URLs or base64-encoded file content\n* Maximum file size: 10MB\n* Supports both direct schema and template-based extraction\n\n**Input Options:**\n1. Document URL\n2. Base64 encoded file content\n3. Direct extraction schema or template ID",
+        "operationId": "extract_text_api_extractor_v1_extract_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "title": "Request Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtractionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error in request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ExtractionResponse": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "title": "Data"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence"
+          }
+        },
+        "type": "object",
+        "required": ["data", "confidence"],
+        "title": "ExtractionResponse"
+      },
+      "AuthError": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "error_code": {
+            "type": "string",
+            "title": "Error Code",
+            "default": "unauthorized"
+          }
+        },
+        "type": "object",
+        "required": ["detail"],
+        "title": "AuthError"
+      },
+      "ValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": ["detail"],
+        "title": "ValidationError"
+      }
+    }
+  }
+} 

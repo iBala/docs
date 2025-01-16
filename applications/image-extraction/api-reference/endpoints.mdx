@@ -1,0 +1,168 @@
+---
+title: 'Image Extraction API'
+description: 'Reference for Image Extraction API endpoints'
+---
+
+<Card title="Authentication" icon="lock">
+  All API endpoints require an API key to be provided in the Authorization header:
+  ```bash
+  Authorization: YOUR_API_KEY
+  ```
+</Card>
+
+## Extract Information from Document
+
+<ParamField path="/api/extractor/v1/extract" method="POST">
+  Extract structured information from documents (PDF or images).
+</ParamField>
+
+### Features
+- Supports PDF and image files (jpg, jpeg, png)
+- Accepts URLs or base64-encoded file content
+- Maximum file size: 10MB
+- Supports both direct schema and template-based extraction
+
+### Input Options
+1. Document URL
+2. Base64 encoded file content
+3. Direct extraction schema or template ID
+
+### Request Body
+
+<ParamField body="url" type="string">
+  URL of the document to process
+</ParamField>
+
+<ParamField body="content" type="string">
+  Base64 encoded file content
+</ParamField>
+
+<ParamField body="schema" type="object">
+  Extraction schema definition
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="object">
+  Extracted structured data
+</ResponseField>
+
+<ResponseField name="confidence" type="number">
+  Confidence score (0.0 to 1.0)
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X POST https://api.example.com/api/extractor/v1/extract \
+  -H "Authorization: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://example.com/document.pdf",
+    "schema": {
+      "fields": [
+        {"name": "invoice_number", "type": "string"},
+        {"name": "total_amount", "type": "number"}
+      ]
+    }
+  }'
+```
+
+```python Python
+import requests
+import json
+
+url = "https://api.example.com/api/extractor/v1/extract"
+headers = {
+    "Authorization": "YOUR_API_KEY",
+    "Content-Type": "application/json"
+}
+payload = {
+    "url": "https://example.com/document.pdf",
+    "schema": {
+        "fields": [
+            {"name": "invoice_number", "type": "string"},
+            {"name": "total_amount", "type": "number"}
+        ]
+    }
+}
+
+response = requests.post(url, headers=headers, json=payload)
+result = response.json()
+print(result)
+```
+
+```javascript JavaScript
+const extractDocument = async () => {
+  const response = await fetch('https://api.example.com/api/extractor/v1/extract', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'YOUR_API_KEY',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      url: 'https://example.com/document.pdf',
+      schema: {
+        fields: [
+          {name: 'invoice_number', type: 'string'},
+          {name: 'total_amount', type: 'number'}
+        ]
+      }
+    })
+  });
+  
+  const data = await response.json();
+  console.log(data);
+}
+```
+
+```php PHP
+<?php
+$curl = curl_init();
+
+curl_setopt_array($curl, [
+  CURLOPT_URL => "https://api.example.com/api/extractor/v1/extract",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_ENCODING => "",
+  CURLOPT_MAXREDIRS => 10,
+  CURLOPT_TIMEOUT => 30,
+  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+  CURLOPT_CUSTOMREQUEST => "POST",
+  CURLOPT_POSTFIELDS => json_encode([
+    "url" => "https://example.com/document.pdf",
+    "schema" => [
+      "fields" => [
+        ["name" => "invoice_number", "type" => "string"],
+        ["name" => "total_amount", "type" => "number"]
+      ]
+    ]
+  ]),
+  CURLOPT_HTTPHEADER => [
+    "Authorization: YOUR_API_KEY",
+    "Content-Type: application/json"
+  ],
+]);
+
+$response = curl_exec($curl);
+$err = curl_error($curl);
+curl_close($curl);
+
+if ($err) {
+  echo "Error: " . $err;
+} else {
+  echo $response;
+}
+?>
+```
+</RequestExample>
+
+<ResponseExample>
+```json JSON Response
+{
+  "data": {
+    "invoice_number": "INV-2024-001",
+    "total_amount": 1250.00
+  },
+  "confidence": 0.95
+}
+```
+</ResponseExample>

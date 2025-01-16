@@ -1,0 +1,55 @@
+---
+title: 'Analyze Tickets'
+openapi: 'POST /api/cs-qa/v1/analyze'
+description: 'Analyze customer service tickets for quality assessment'
+---
+
+### Process Flow
+1. Validates the API key and gets account_id
+2. Generates a batch_id
+3. Creates a batch record in database
+4. Queues the processing task
+5. Returns the batch_id for tracking
+
+<RequestExample>
+```bash cURL
+curl -X POST https://api.example.com/api/cs-qa/v1/analyze \
+  -H "Authorization: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tickets": [
+      {
+        "ticket_id": "123",
+        "subject": "Need help",
+        "description": "Having issues with login",
+        "status": "open",
+        "priority": "high"
+      }
+    ]
+  }'
+```
+
+```python Python
+import requests
+
+tickets_payload = {
+    "tickets": [{
+        "ticket_id": "123",
+        "subject": "Need help",
+        "description": "Having issues with login",
+        "status": "open",
+        "priority": "high"
+    }]
+}
+
+response = requests.post(
+    "https://api.example.com/api/cs-qa/v1/analyze",
+    headers={
+        "Authorization": "YOUR_API_KEY",
+        "Content-Type": "application/json"
+    },
+    json=tickets_payload
+)
+batch_id = response.json()["batch_id"]
+```
+</RequestExample> 

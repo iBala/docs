@@ -1,0 +1,61 @@
+---
+title: 'Extract Information'
+openapi: 'POST /api/extractor/v1/extract'
+description: 'Extract structured information from documents (PDF or images)'
+---
+
+<Note>
+This API requires authentication. See our [Authentication Guide](/common/authentication) for details.
+</Note>
+
+### Features
+- Supports PDF and image files (jpg, jpeg, png)
+- Accepts URLs or base64-encoded file content
+- Maximum file size: 10MB
+- Supports both direct schema and template-based extraction
+
+### Input Options
+1. Document URL
+2. Base64 encoded file content
+3. Direct extraction schema or template ID
+
+<RequestExample>
+```bash cURL
+curl -X POST https://api.example.com/api/extractor/v1/extract \
+  -H "Authorization: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://example.com/document.pdf",
+    "schema": {
+      "fields": [
+        {"name": "invoice_number", "type": "string"},
+        {"name": "total_amount", "type": "number"}
+      ]
+    }
+  }'
+```
+
+```python Python
+import requests
+
+payload = {
+    "url": "https://example.com/document.pdf",
+    "schema": {
+        "fields": [
+            {"name": "invoice_number", "type": "string"},
+            {"name": "total_amount", "type": "number"}
+        ]
+    }
+}
+
+response = requests.post(
+    "https://api.example.com/api/extractor/v1/extract",
+    headers={
+        "Authorization": "YOUR_API_KEY",
+        "Content-Type": "application/json"
+    },
+    json=payload
+)
+result = response.json()
+```
+</RequestExample> 

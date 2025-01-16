@@ -1,0 +1,49 @@
+---
+title: 'Templates'
+description: 'Create and manage extraction templates'
+---
+
+# Working with Templates
+
+Templates help you standardize your extraction process and save time when processing similar documents repeatedly.
+
+## Creating Templates
+
+<Steps>
+  <Step title="Set Up Fields">
+    Use the Schema Builder to define your extraction fields:
+    
+    <CodeGroup>
+    ```json Example Schema
+    {
+      "fields": [
+        {
+          "name": "invoice_number",
+          "type": "string",
+          "description": "Invoice number usually found in top right"
+        },
+        {
+          "name": "total_amount",
+          "type": "number",
+          "description": "Total amount including taxes"
+        }
+      ]
+    }
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Add Descriptions">
+    For each field, provide:
+    - Clear, specific field names
+    - Detailed descriptions
+    - Expected data types
+  </Step>
+
+  <Step title="Save Template">
+    1. Click "Save as Template"
+    2. Enter template name
+    3. Add optional description
+    4. Choose visibility (private/team)
+  </Step>
+</Steps>

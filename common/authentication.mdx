@@ -1,0 +1,148 @@
+---
+title: 'API Authentication'
+description: 'Learn how to authenticate your API requests using API keys'
+---
+
+# API Authentication
+
+AppliedAI uses API keys to authenticate requests. You can manage your API keys from the dashboard. Each API key has full access to the API, so be sure to keep them secure.
+
+## Getting Started with API Keys
+
+<Steps>
+  <Step title="Access the Dashboard">
+    Navigate to the <a href="https://dashboard.appliedai.club/dashboard" target="_blank">dashboard</a> and click on "API Keys" in the sidebar navigation.
+    
+    You'll see your existing API keys or an option to generate new one.
+    
+    **Important**: Note that only one active API key is allowed at this time. So when you generated a new key, the old key will be revoked.
+  </Step>
+
+  <Step title="Generate API Key">
+    1. Click the "Generate API Key" button
+    2. Enter a descriptive name for your key (e.g., "Production API Key")
+    3. Click "Generate Key"
+    
+    **Important**: Copy your API key immediately and store it securely. You won't be able to see the complete key again.
+  </Step>
+
+  <Step title="Implement Authentication">
+    Include your API key in the request headers:
+
+    <CodeGroup>
+    ```bash cURL
+    curl https://backend.appliedai.club/v1/endpoint \
+      -H "Authorization: Bearer YOUR_API_KEY"
+    ```
+
+    ```python Python
+    import requests
+
+    headers = {
+        "Authorization": f"Bearer YOUR_API_KEY"
+    }
+
+    response = requests.get("https://backend.appliedai.club/v1/endpoint", headers=headers)
+    ```
+
+    ```javascript JavaScript
+    const response = await fetch('https://backend.appliedai.club/v1/endpoint', {
+      headers: {
+        'Authorization': 'Bearer YOUR_API_KEY'
+      }
+    });
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Secure Storage">
+    Store your API key securely using environment variables:
+
+    <CodeGroup>
+    ```python Python
+    # .env file
+    APPLIED_AI_API_KEY=aai_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+    # Python code
+    import os
+    from dotenv import load_dotenv
+
+    load_dotenv()
+    api_key = os.getenv('APPLIED_AI_API_KEY')
+    ```
+
+    ```javascript JavaScript
+    // .env file
+    APPLIED_AI_API_KEY=aai_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+    // Node.js
+    require('dotenv').config();
+    const apiKey = process.env.APPLIED_AI_API_KEY;
+    ```
+    </CodeGroup>
+  </Step>
+</Steps>
+
+## API Key Properties
+
+Each API key displays the following information:
+- **Key Name**: The name you assigned to the key
+- **Last Used**: Timestamp of the key's most recent use
+- **Created At**: When the key was generated
+- **Last Four**: Last four characters of the key for identification
+- **Status**: Whether the key is active or revoked
+
+### Security Best Practices
+- Never share your API keys or commit them to version control
+- Regularly rotate your API keys for enhanced security
+- Revoke unused or compromised keys immediately
+
+## Rate Limiting
+
+API requests are rate-limited based on your subscription tier:
+
+<CardGroup cols={3}>
+  <Card title="Free Tier" icon="paper-plane">
+    100 requests per minute
+  </Card>
+  <Card title="Pro Tier" icon="rocket">
+    1000 requests per minute
+  </Card>
+  <Card title="Enterprise Tier" icon="building">
+    Custom limits
+  </Card>
+</CardGroup>
+
+### Error Responses
+
+<CodeGroup>
+```json Authentication Error
+{
+  "error": {
+    "message": "Invalid API key provided",
+    "type": "authentication_error"
+  }
+}
+```
+
+```json Rate Limit Error
+{
+  "error": {
+    "message": "Too many requests. Please try again later.",
+    "type": "rate_limit_error",
+    "retry_after": 30
+  }
+}
+```
+</CodeGroup>
+
+<Note>
+Keep your API keys secure and never share them publicly. If you suspect a key has been compromised, revoke it immediately and generate a new one.
+</Note>
+
+## Support
+
+If you encounter any authentication issues:
+1. Check our [troubleshooting guide](/common/troubleshooting)
+2. Contact <a href="mailto:support@appliedai.club" target="_blank">support@appliedai.club</a>
+3. Visit our <a href="https://status.appliedai.club" target="_blank">status page</a> for system updates 

@@ -1,0 +1,15 @@
+This is a documentation for Applied AI.
+
+Applied AI has the following Applications: 
+1. User Research AI Assistant: A User research AI assistant that can talk to customers to conduct user research via chat. 
+2. Image Extraction AI Assistant: An AI assistant that can extract information from images and documents. 
+3. Freshdesk Quality Assistant AI: An AI assistant that evaluates the quality of agent responses to Freshdesk tickets. 
+
+
+Each application has its own API reference. 
+
+
+How to operate: 
+1. You will focus on understanding the context before responding to the user. 
+2. You will focus on high quality, scalable and efficient code. 
+3. Think and reason like a human.

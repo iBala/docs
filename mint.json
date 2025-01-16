@@ -1,15 +1,15 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "Starter Kit",
+  "name": "Applied AI",
   "logo": {
-    "dark": "/logo/dark.svg",
-    "light": "/logo/light.svg"
+    "light": "/logo/Applied_Ai_Docs_Logo_Light.png",
+    "dark": "/logo/Applied_Ai_Docs_Logo_Dark.png"
   },
   "favicon": "/favicon.svg",
   "colors": {
-    "primary": "#0D9373",
-    "light": "#07C983",
-    "dark": "#0D9373",
+    "primary": "#9D8DF1",
+    "light": "#9D8DF1",
+    "dark": "#9D8DF1",
     "anchors": {
       "from": "#0D9373",
       "to": "#07C983"
@@ -18,12 +18,12 @@
   "topbarLinks": [
     {
       "name": "Support",
-      "url": "mailto:hi@mintlify.com"
+      "url": "mailto:hello@appliedai.club"
     }
   ],
   "topbarCtaButton": {
     "name": "Dashboard",
-    "url": "https://dashboard.mintlify.com"
+    "url": "https://dashboard.applliedai.club"
   },
   "tabs": [
     {
@@ -32,60 +32,62 @@
     }
   ],
   "anchors": [
-    {
-      "name": "Documentation",
-      "icon": "book-open-cover",
-      "url": "https://mintlify.com/docs"
-    },
-    {
-      "name": "Community",
-      "icon": "slack",
-      "url": "https://mintlify.com/community"
-    },
-    {
-      "name": "Blog",
-      "icon": "newspaper",
-      "url": "https://mintlify.com/blog"
-    }
   ],
   "navigation": [
     {
-      "group": "Get Started",
+      "group": "Getting Started",
+      "pages": ["introduction"]
+    },
+    {
+      "group": "Common Features",
       "pages": [
-        "introduction",
-        "quickstart",
-        "development"
+        "common/dashboard",
+        "common/authentication"
       ]
     },
     {
-      "group": "Essentials",
+      "group": "User Research",
       "pages": [
-        "essentials/markdown",
-        "essentials/code",
-        "essentials/images",
-        "essentials/settings",
-        "essentials/navigation",
-        "essentials/reusable-snippets"
+        "applications/user-research/overview",
+        "applications/user-research/getting-started",
+        "applications/user-research/managing-research",
+        "applications/user-research/best-practices"
       ]
     },
     {
-      "group": "API Documentation",
+      "group": "Image Extraction",
       "pages": [
-        "api-reference/introduction"
+        "applications/image-extraction/overview",
+        "applications/image-extraction/getting-started",
+        "applications/image-extraction/templates",
+        "applications/image-extraction/best-practices",
+        {
+          "group": "API Reference",
+          "pages": [
+            "applications/image-extraction/api-reference/extract"
+          ]
+        }
       ]
     },
     {
-      "group": "Endpoint Examples",
+      "group": "Freshdesk Quality Assistant",
       "pages": [
-        "api-reference/endpoint/get",
-        "api-reference/endpoint/create",
-        "api-reference/endpoint/delete"
+        "applications/freshdesk-quality/overview",
+        "applications/freshdesk-quality/schemas",
+        "applications/freshdesk-quality/integration",
+        "applications/freshdesk-quality/reports",
+        {
+          "group": "API Reference",
+          "pages": [
+            "applications/freshdesk-quality/api-reference/verify",
+            "applications/freshdesk-quality/api-reference/analyze",
+            "applications/freshdesk-quality/api-reference/status"
+          ]
+        }
       ]
     }
   ],
   "footerSocials": {
-    "x": "https://x.com/mintlify",
-    "github": "https://github.com/mintlify",
-    "linkedin": "https://linkedin.com/company/mintlify"
+    
   }
 }

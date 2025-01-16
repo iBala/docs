@@ -1,0 +1,68 @@
+---
+title: 'Quality Schemas'
+description: 'Create and manage quality assessment frameworks'
+---
+
+# Quality Schema Management
+
+Define how your customer service quality should be evaluated.
+
+<Steps>
+  <Step title="Create Schema">
+    <Frame>
+      [Placeholder for schema creation interface]
+    </Frame>
+
+    1. Navigate to "Quality Schema"
+    2. Click "Create Schema"
+    3. Define parameters:
+       - Schema Name
+       - Categories
+       - Scoring Criteria
+       - Weightage
+
+    <Note>
+      Make your criteria specific and measurable for consistent evaluation
+    </Note>
+  </Step>
+
+  <Step title="Configure Categories">
+    Example schema structure:
+
+    <CodeGroup>
+    ```json Example Schema
+    {
+      "name": "Support Quality Standard",
+      "categories": [
+        {
+          "name": "Communication",
+          "weight": 0.4,
+          "criteria": [
+            {
+              "name": "Clarity",
+              "description": "Clear and concise explanation",
+              "score_range": [0, 5]
+            }
+          ]
+        }
+      ]
+    }
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Set Scoring Rules">
+    Define scoring guidelines:
+    - Score ranges
+    - Passing thresholds
+    - Critical criteria
+    - Auto-fail conditions
+  </Step>
+
+  <Step title="Test and Deploy">
+    1. Run test evaluations
+    2. Adjust weights if needed
+    3. Deploy to production
+    4. Monitor initial results
+  </Step>
+</Steps> 
