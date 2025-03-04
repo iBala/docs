@@ -1,0 +1,43 @@
+---
+title: 'Check Schema Generation Status'
+openapi: 'GET /api/extractor/v1/generate-schema-status/{task_id}'
+description: 'Check the status of an asynchronous schema generation task'
+---
+
+<Note>
+This API requires authentication. See our [Authentication Guide](/common/authentication) for details.
+</Note>
+
+### Path Parameters
+
+<ParamField path="task_id" type="string" required>
+  UUID of the schema generation task
+</ParamField>
+
+### Status Values
+- **PROCESSING**: Task is currently being processed
+- **COMPLETED**: Task has completed successfully
+- **FAILED**: Task has failed
+
+When status is COMPLETED, the response will include the schema generation results.
+When status is FAILED, the response will include error information.
+
+<RequestExample>
+```bash cURL
+curl -X GET https://api.appliedai.club/api/extractor/v1/generate-schema-status/550e8400-e29b-41d4-a716-446655440000 \
+  -H "Authorization: YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+url = "https://api.appliedai.club/api/extractor/v1/generate-schema-status/550e8400-e29b-41d4-a716-446655440000"
+headers = {
+    "Authorization": "YOUR_API_KEY"
+}
+
+response = requests.get(url, headers=headers)
+result = response.json()
+print(result)
+```
+</RequestExample> 

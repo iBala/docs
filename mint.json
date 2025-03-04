@@ -70,7 +70,12 @@
         {
           "group": "API Reference",
           "pages": [
-            "applications/image-extraction/api-reference/extract"
+            "applications/image-extraction/api-reference/extract",
+            "applications/image-extraction/api-reference/extract-async",
+            "applications/image-extraction/api-reference/extract-status",
+            "applications/image-extraction/api-reference/generate-schema",
+            "applications/image-extraction/api-reference/generate-schema-async",
+            "applications/image-extraction/api-reference/generate-schema-status"
           ]
         }
       ]

@@ -1,0 +1,92 @@
+---
+title: 'Extract Information Asynchronously'
+openapi: 'POST /api/extractor/v1/extract-async'
+description: 'Extract structured information from documents asynchronously'
+---
+
+<Note>
+This API requires authentication. See our [Authentication Guide](/common/authentication) for details.
+</Note>
+
+### Features
+- Supports PDF and image files (jpg, jpeg, png)
+- Accepts URLs or base64-encoded file content
+- Maximum file size: 10MB
+- Supports both direct schema and template-based extraction
+- Returns immediately with a task_id for status tracking
+- Optional callback URL for webhook notification when processing completes
+
+### Request Body
+
+<ParamField body="document" type="object">
+  Document to process (either URL or file content)
+</ParamField>
+
+<ParamField body="document.url" type="string">
+  URL of the document to process
+</ParamField>
+
+<ParamField body="document.file_content" type="string">
+  Base64 encoded file content
+</ParamField>
+
+<ParamField body="extraction_schema" type="object">
+  Extraction schema definition
+</ParamField>
+
+<ParamField body="template_id" type="string">
+  ID of a saved extraction template
+</ParamField>
+
+<ParamField body="callback_url" type="string">
+  Optional URL for webhook notification when processing completes
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X POST https://api.appliedai.club/api/extractor/v1/extract-async \
+  -H "Authorization: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "document": {
+      "url": "https://example.com/invoice.pdf"
+    },
+    "extraction_schema": {
+      "fields": [
+        {"name": "invoice_number", "type": "string", "description": "Invoice number from the document"},
+        {"name": "total_amount", "type": "number", "description": "Total amount from the invoice"}
+      ],
+      "document_description": "Invoice document"
+    },
+    "callback_url": "https://your-server.com/webhook"
+  }'
+```
+
+```python Python
+import requests
+import json
+
+url = "https://api.appliedai.club/api/extractor/v1/extract-async"
+headers = {
+    "Authorization": "YOUR_API_KEY",
+    "Content-Type": "application/json"
+}
+payload = {
+    "document": {
+        "url": "https://example.com/invoice.pdf"
+    },
+    "extraction_schema": {
+        "fields": [
+            {"name": "invoice_number", "type": "string", "description": "Invoice number from the document"},
+            {"name": "total_amount", "type": "number", "description": "Total amount from the invoice"}
+        ],
+        "document_description": "Invoice document"
+    },
+    "callback_url": "https://your-server.com/webhook"
+}
+
+response = requests.post(url, headers=headers, json=payload)
+result = response.json()
+print(result)
+```
+</RequestExample> 
