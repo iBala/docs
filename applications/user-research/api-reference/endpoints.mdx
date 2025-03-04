@@ -1,0 +1,524 @@
+---
+title: 'User Research API'
+description: 'Reference for User Research API endpoints'
+---
+
+<Card title="Authentication" icon="lock">
+  All API endpoints require an API key to be provided in the Authorization header:
+  ```bash
+  Authorization: YOUR_API_KEY
+  ```
+</Card>
+
+## Evaluate Resume
+
+<ParamField path="/api/recruit/v1/evaluate" method="POST">
+  Evaluate a resume against job requirements using LLM.
+</ParamField>
+
+### Description
+This endpoint validates the request and authentication, processes the resume and job details through LLM, and returns structured evaluation results.
+
+### Request Body
+
+<ParamField body="job_id" type="string" required>
+  Unique identifier for the job
+</ParamField>
+
+<ParamField body="application_id" type="string" required>
+  Unique identifier for the application
+</ParamField>
+
+<ParamField body="resume_url" type="string">
+  URL to the resume document (PDF or other supported format)
+</ParamField>
+
+<ParamField body="job_details" type="object" required>
+  Details about the job requirements
+</ParamField>
+
+<ParamField body="job_details.description" type="string">
+  Text description of the job
+</ParamField>
+
+<ParamField body="job_details.description_file_url" type="string">
+  URL to a file containing the job description
+</ParamField>
+
+<ParamField body="job_details.required_skills" type="array" required>
+  Array of required skills for the job
+</ParamField>
+
+### Response
+
+<ResponseField name="skills" type="object">
+  Evaluation results for each skill
+</ResponseField>
+
+<ResponseField name="skills.{skill_name}.score" type="integer">
+  Score from 0-100 for the skill
+</ResponseField>
+
+<ResponseField name="skills.{skill_name}.evidence" type="string">
+  Evidence from the resume supporting the score
+</ResponseField>
+
+<ResponseField name="skills.{skill_name}.confidence" type="integer">
+  Confidence level (0-100) in the evaluation
+</ResponseField>
+
+<ResponseField name="evaluation_date" type="string">
+  ISO 8601 timestamp of when the evaluation was performed
+</ResponseField>
+
+### Error Codes
+| Status | Description |
+|--------|-------------|
+| 400 | Bad Request |
+| 401 | Unauthorized |
+| 422 | Validation error |
+| 429 | Rate limit exceeded |
+| 500 | Internal Server Error |
+
+<RequestExample>
+```bash cURL
+curl -X POST https://api.appliedai.club/api/recruit/v1/evaluate \
+  -H "Authorization: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "job_id": "job-123",
+    "application_id": "app-456",
+    "resume_url": "https://example.com/resumes/candidate.pdf",
+    "job_details": {
+      "description": "We are looking for a senior software engineer with experience in React, Node.js, and AWS.",
+      "required_skills": [
+        {
+          "name": "React",
+          "type": "technical",
+          "required": true
+        },
+        {
+          "name": "Node.js",
+          "type": "technical",
+          "required": true
+        },
+        {
+          "name": "AWS",
+          "type": "technical",
+          "required": true
+        }
+      ]
+    }
+  }'
+```
+
+```python Python
+import requests
+import json
+
+url = "https://api.appliedai.club/api/recruit/v1/evaluate"
+headers = {
+    "Authorization": "YOUR_API_KEY",
+    "Content-Type": "application/json"
+}
+payload = {
+    "job_id": "job-123",
+    "application_id": "app-456",
+    "resume_url": "https://example.com/resumes/candidate.pdf",
+    "job_details": {
+        "description": "We are looking for a senior software engineer with experience in React, Node.js, and AWS.",
+        "required_skills": [
+            {
+                "name": "React",
+                "type": "technical",
+                "required": True
+            },
+            {
+                "name": "Node.js",
+                "type": "technical",
+                "required": True
+            },
+            {
+                "name": "AWS",
+                "type": "technical",
+                "required": True
+            }
+        ]
+    }
+}
+
+response = requests.post(url, headers=headers, json=payload)
+print(response.json())
+```
+</RequestExample>
+
+<ResponseExample>
+```json JSON Response
+{
+  "skills": {
+    "React": {
+      "score": 85,
+      "evidence": "Candidate has 3 years of experience with React, built multiple production applications, and contributed to open source React libraries.",
+      "confidence": 90
+    },
+    "Node.js": {
+      "score": 75,
+      "evidence": "Candidate has worked with Node.js for backend services and API development for 2 years.",
+      "confidence": 85
+    },
+    "AWS": {
+      "score": 60,
+      "evidence": "Candidate mentions using AWS services like S3 and EC2, but lacks deeper experience with other AWS services.",
+      "confidence": 80
+    }
+  },
+  "evaluation_date": "2023-06-15T10:30:00Z"
+}
+```
+</ResponseExample>
+
+## Analyze Job Description
+
+<ParamField path="/api/recruit/v1/analyze-job" method="POST">
+  Analyze a job description to extract key parameters.
+</ParamField>
+
+### Description
+This endpoint processes a job description through LLM and returns structured analysis results including job title, required skills (2-5), and interview questions (2-5).
+
+### Request Body
+
+<ParamField body="description" type="string">
+  Text of the job description
+</ParamField>
+
+<ParamField body="description_file_url" type="string">
+  URL to a file containing the job description
+</ParamField>
+
+### Response
+
+<ResponseField name="name" type="string">
+  Extracted job title
+</ResponseField>
+
+<ResponseField name="required_skills" type="array">
+  Array of required skills (2-5 items)
+</ResponseField>
+
+<ResponseField name="required_skills[].name" type="string">
+  Name of the skill
+</ResponseField>
+
+<ResponseField name="required_skills[].type" type="string">
+  Type of skill (e.g., technical, soft skill)
+</ResponseField>
+
+<ResponseField name="required_skills[].required" type="boolean">
+  Whether the skill is required or optional
+</ResponseField>
+
+<ResponseField name="interview_questions" type="array">
+  Array of suggested interview questions (2-5 items)
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  Original job description text
+</ResponseField>
+
+<ResponseField name="description_file_url" type="string">
+  Original job description file URL
+</ResponseField>
+
+### Error Codes
+| Status | Description |
+|--------|-------------|
+| 400 | Bad Request |
+| 401 | Unauthorized |
+| 422 | Validation error |
+| 429 | Rate limit exceeded |
+| 500 | Internal Server Error |
+
+<RequestExample>
+```bash cURL
+curl -X POST https://api.appliedai.club/api/recruit/v1/analyze-job \
+  -H "Authorization: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "description": "We are looking for a Senior Software Engineer to join our team. The ideal candidate will have 5+ years of experience with React, Node.js, and AWS. They should be comfortable working in an agile environment and have excellent communication skills."
+  }'
+```
+
+```python Python
+import requests
+import json
+
+url = "https://api.appliedai.club/api/recruit/v1/analyze-job"
+headers = {
+    "Authorization": "YOUR_API_KEY",
+    "Content-Type": "application/json"
+}
+payload = {
+    "description": "We are looking for a Senior Software Engineer to join our team. The ideal candidate will have 5+ years of experience with React, Node.js, and AWS. They should be comfortable working in an agile environment and have excellent communication skills."
+}
+
+response = requests.post(url, headers=headers, json=payload)
+print(response.json())
+```
+</RequestExample>
+
+<ResponseExample>
+```json JSON Response
+{
+  "name": "Senior Software Engineer",
+  "required_skills": [
+    {
+      "name": "React",
+      "type": "technical",
+      "required": true
+    },
+    {
+      "name": "Node.js",
+      "type": "technical",
+      "required": true
+    },
+    {
+      "name": "AWS",
+      "type": "technical",
+      "required": true
+    },
+    {
+      "name": "Agile Methodology",
+      "type": "process",
+      "required": true
+    },
+    {
+      "name": "Communication",
+      "type": "soft skill",
+      "required": true
+    }
+  ],
+  "interview_questions": [
+    "Can you describe a complex React component you've built and the challenges you faced?",
+    "How have you used Node.js to build scalable backend services?",
+    "What AWS services have you worked with and how did you implement them?",
+    "How do you approach working in an agile team environment?",
+    "Describe a situation where your communication skills were crucial to a project's success."
+  ],
+  "description": "We are looking for a Senior Software Engineer to join our team. The ideal candidate will have 5+ years of experience with React, Node.js, and AWS. They should be comfortable working in an agile environment and have excellent communication skills."
+}
+```
+</ResponseExample>
+
+## Extract Resumes
+
+<ParamField path="/api/recruit/v1/extract-resumes" method="POST">
+  Extract information from resumes.
+</ParamField>
+
+### Description
+This endpoint submits documents for asynchronous processing and returns a job ID for tracking progress.
+
+### Request Body
+
+<ParamField body="files" type="array">
+  Array of resume files to process
+</ParamField>
+
+<ParamField body="files[].filename" type="string" required>
+  Name of the file
+</ParamField>
+
+<ParamField body="files[].content_type" type="string" required>
+  MIME type of the file
+</ParamField>
+
+<ParamField body="files[].content" type="string" required>
+  Base64 encoded file content
+</ParamField>
+
+<ParamField body="urls" type="array">
+  Array of URLs to resume files
+</ParamField>
+
+### Response
+
+<ResponseField name="job_id" type="string">
+  Unique identifier for the extraction job
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Status message
+</ResponseField>
+
+<ResponseField name="total_documents" type="integer">
+  Total number of documents submitted for processing
+</ResponseField>
+
+### Error Codes
+| Status | Description |
+|--------|-------------|
+| 400 | Bad Request |
+| 401 | Unauthorized |
+| 422 | Validation error |
+| 429 | Rate limit exceeded |
+| 500 | Internal Server Error |
+
+<RequestExample>
+```bash cURL
+curl -X POST https://api.appliedai.club/api/recruit/v1/extract-resumes \
+  -H "Authorization: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "urls": [
+      "https://example.com/resumes/candidate1.pdf",
+      "https://example.com/resumes/candidate2.pdf"
+    ]
+  }'
+```
+
+```python Python
+import requests
+import json
+import base64
+
+url = "https://api.appliedai.club/api/recruit/v1/extract-resumes"
+headers = {
+    "Authorization": "YOUR_API_KEY",
+    "Content-Type": "application/json"
+}
+
+# Option 1: Submit URLs
+payload = {
+    "urls": [
+        "https://example.com/resumes/candidate1.pdf",
+        "https://example.com/resumes/candidate2.pdf"
+    ]
+}
+
+# Option 2: Submit files
+# with open("resume.pdf", "rb") as f:
+#     file_content = base64.b64encode(f.read()).decode('utf-8')
+#
+# payload = {
+#     "files": [
+#         {
+#             "filename": "resume.pdf",
+#             "content_type": "application/pdf",
+#             "content": file_content
+#         }
+#     ]
+# }
+
+response = requests.post(url, headers=headers, json=payload)
+print(response.json())
+```
+</RequestExample>
+
+<ResponseExample>
+```json JSON Response
+{
+  "job_id": "550e8400-e29b-41d4-a716-446655440000",
+  "message": "Processing started",
+  "total_documents": 2
+}
+```
+</ResponseExample>
+
+## Get Extraction Status
+
+<ParamField path="/api/recruit/v1/extraction-status/{job_id}" method="GET">
+  Get the status and results of a resume extraction job.
+</ParamField>
+
+### Path Parameters
+
+<ParamField path="job_id" type="string" required>
+  The ID of the extraction job to check
+</ParamField>
+
+### Response
+
+<ResponseField name="successful_extractions" type="array">
+  Array of successfully extracted resume details
+</ResponseField>
+
+<ResponseField name="successful_extractions[].application_name" type="string">
+  Name of the applicant
+</ResponseField>
+
+<ResponseField name="successful_extractions[].email" type="string">
+  Email of the applicant
+</ResponseField>
+
+<ResponseField name="successful_extractions[].resume_url" type="string">
+  URL to the resume
+</ResponseField>
+
+<ResponseField name="total_processed" type="integer">
+  Total number of documents processed
+</ResponseField>
+
+<ResponseField name="successful_count" type="integer">
+  Number of documents successfully processed
+</ResponseField>
+
+<ResponseField name="failed_count" type="integer">
+  Number of documents that failed processing
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Current status of the extraction job
+</ResponseField>
+
+### Error Codes
+| Status | Description |
+|--------|-------------|
+| 400 | Bad Request |
+| 401 | Unauthorized |
+| 404 | Not Found |
+| 422 | Validation error |
+| 429 | Rate limit exceeded |
+| 500 | Internal Server Error |
+
+<RequestExample>
+```bash cURL
+curl -X GET https://api.appliedai.club/api/recruit/v1/extraction-status/550e8400-e29b-41d4-a716-446655440000 \
+  -H "Authorization: YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+url = "https://api.appliedai.club/api/recruit/v1/extraction-status/550e8400-e29b-41d4-a716-446655440000"
+headers = {
+    "Authorization": "YOUR_API_KEY"
+}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+</RequestExample>
+
+<ResponseExample>
+```json JSON Response
+{
+  "successful_extractions": [
+    {
+      "application_name": "John Doe",
+      "email": "john.doe@example.com",
+      "resume_url": "https://example.com/resumes/candidate1.pdf"
+    },
+    {
+      "application_name": "Jane Smith",
+      "email": "jane.smith@example.com",
+      "resume_url": "https://example.com/resumes/candidate2.pdf"
+    }
+  ],
+  "total_processed": 2,
+  "successful_count": 2,
+  "failed_count": 0,
+  "status": "completed"
+}
+```
+</ResponseExample> 

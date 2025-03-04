@@ -29,16 +29,24 @@ description: 'Reference for Image Extraction API endpoints'
 
 ### Request Body
 
-<ParamField body="url" type="string">
+<ParamField body="document" type="object">
+  Document to process (either URL or file content)
+</ParamField>
+
+<ParamField body="document.url" type="string">
   URL of the document to process
 </ParamField>
 
-<ParamField body="content" type="string">
+<ParamField body="document.file_content" type="string">
   Base64 encoded file content
 </ParamField>
 
-<ParamField body="schema" type="object">
+<ParamField body="extraction_schema" type="object">
   Extraction schema definition
+</ParamField>
+
+<ParamField body="template_id" type="string">
+  ID of a saved extraction template
 </ParamField>
 
 ### Response
@@ -51,18 +59,31 @@ description: 'Reference for Image Extraction API endpoints'
   Confidence score (0.0 to 1.0)
 </ResponseField>
 
+### Error Codes
+
+| Status | Description |
+|--------|-------------|
+| 400 | Invalid input (no document, invalid type, file too large) |
+| 401 | Authentication failed |
+| 422 | Validation error in request body |
+| 429 | Rate limit exceeded |
+| 500 | Internal server error |
+
 <RequestExample>
 ```bash cURL
-curl -X POST https://api.example.com/api/extractor/v1/extract \
+curl -X POST https://api.appliedai.club/api/extractor/v1/extract \
   -H "Authorization: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "url": "https://example.com/document.pdf",
-    "schema": {
+    "document": {
+      "url": "https://example.com/document.pdf"
+    },
+    "extraction_schema": {
       "fields": [
-        {"name": "invoice_number", "type": "string"},
-        {"name": "total_amount", "type": "number"}
-      ]
+        {"name": "invoice_number", "type": "string", "description": "Invoice number from the document"},
+        {"name": "total_amount", "type": "number", "description": "Total amount from the invoice"}
+      ],
+      "document_description": "Invoice document"
     }
   }'
 ```
@@ -71,18 +92,21 @@ curl -X POST https://api.example.com/api/extractor/v1/extract \
 import requests
 import json
 
-url = "https://api.example.com/api/extractor/v1/extract"
+url = "https://api.appliedai.club/api/extractor/v1/extract"
 headers = {
     "Authorization": "YOUR_API_KEY",
     "Content-Type": "application/json"
 }
 payload = {
-    "url": "https://example.com/document.pdf",
-    "schema": {
+    "document": {
+        "url": "https://example.com/document.pdf"
+    },
+    "extraction_schema": {
         "fields": [
-            {"name": "invoice_number", "type": "string"},
-            {"name": "total_amount", "type": "number"}
-        ]
+            {"name": "invoice_number", "type": "string", "description": "Invoice number from the document"},
+            {"name": "total_amount", "type": "number", "description": "Total amount from the invoice"}
+        ],
+        "document_description": "Invoice document"
     }
 }
 
@@ -93,19 +117,22 @@ print(result)
 
 ```javascript JavaScript
 const extractDocument = async () => {
-  const response = await fetch('https://api.example.com/api/extractor/v1/extract', {
+  const response = await fetch('https://api.appliedai.club/api/extractor/v1/extract', {
     method: 'POST',
     headers: {
       'Authorization': 'YOUR_API_KEY',
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      url: 'https://example.com/document.pdf',
-      schema: {
+      document: {
+        url: 'https://example.com/document.pdf'
+      },
+      extraction_schema: {
         fields: [
-          {name: 'invoice_number', type: 'string'},
-          {name: 'total_amount', type: 'number'}
-        ]
+          {name: 'invoice_number', type: 'string', description: 'Invoice number from the document'},
+          {name: 'total_amount', type: 'number', description: 'Total amount from the invoice'}
+        ],
+        document_description: 'Invoice document'
       }
     })
   });
@@ -120,7 +147,7 @@ const extractDocument = async () => {
 $curl = curl_init();
 
 curl_setopt_array($curl, [
-  CURLOPT_URL => "https://api.example.com/api/extractor/v1/extract",
+  CURLOPT_URL => "https://api.appliedai.club/api/extractor/v1/extract",
   CURLOPT_RETURNTRANSFER => true,
   CURLOPT_ENCODING => "",
   CURLOPT_MAXREDIRS => 10,
@@ -128,12 +155,15 @@ curl_setopt_array($curl, [
   CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
   CURLOPT_CUSTOMREQUEST => "POST",
   CURLOPT_POSTFIELDS => json_encode([
-    "url" => "https://example.com/document.pdf",
-    "schema" => [
+    "document" => [
+      "url" => "https://example.com/document.pdf"
+    ],
+    "extraction_schema" => [
       "fields" => [
-        ["name" => "invoice_number", "type" => "string"],
-        ["name" => "total_amount", "type" => "number"]
-      ]
+        ["name" => "invoice_number", "type" => "string", "description" => "Invoice number from the document"],
+        ["name" => "total_amount", "type" => "number", "description" => "Total amount from the invoice"]
+      ],
+      "document_description" => "Invoice document"
     ]
   ]),
   CURLOPT_HTTPHEADER => [
@@ -163,6 +193,380 @@ if ($err) {
     "total_amount": 1250.00
   },
   "confidence": 0.95
+}
+```
+</ResponseExample>
+
+## Extract Information Asynchronously
+
+<ParamField path="/api/extractor/v1/extract-async" method="POST">
+  Extract structured information from documents asynchronously.
+</ParamField>
+
+### Features
+- Supports PDF and image files (jpg, jpeg, png)
+- Accepts URLs or base64-encoded file content
+- Maximum file size: 10MB
+- Supports both direct schema and template-based extraction
+- Returns immediately with a task_id for status tracking
+- Optional callback URL for webhook notification when processing completes
+
+### Request Body
+
+<ParamField body="document" type="object">
+  Document to process (either URL or file content)
+</ParamField>
+
+<ParamField body="extraction_schema" type="object">
+  Extraction schema definition
+</ParamField>
+
+<ParamField body="template_id" type="string">
+  ID of a saved extraction template
+</ParamField>
+
+<ParamField body="callback_url" type="string">
+  Optional URL for webhook notification when processing completes
+</ParamField>
+
+### Response
+
+<ResponseField name="task_id" type="string">
+  Unique identifier for the extraction task
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Current status of the task (processing, completed, failed)
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Status message
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X POST https://api.appliedai.club/api/extractor/v1/extract-async \
+  -H "Authorization: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "document": {
+      "url": "https://example.com/invoice.pdf"
+    },
+    "extraction_schema": {
+      "fields": [
+        {"name": "invoice_number", "type": "string", "description": "Invoice number from the document"},
+        {"name": "total_amount", "type": "number", "description": "Total amount from the invoice"}
+      ],
+      "document_description": "Invoice document"
+    }
+    "callback_url": "https://your-server.com/webhook"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json JSON Response
+{
+  "task_id": "550e8400-e29b-41d4-a716-446655440000",
+  "status": "processing",
+  "message": "Task submitted successfully"
+}
+```
+</ResponseExample>
+
+## Check Extraction Task Status
+
+<ParamField path="/api/extractor/v1/extract-status/{task_id}" method="GET">
+  Check the status of an asynchronous extraction task.
+</ParamField>
+
+### Path Parameters
+
+<ParamField path="task_id" type="string" required>
+  UUID of the extraction task
+</ParamField>
+
+### Response
+
+<ResponseField name="task_id" type="string">
+  Unique identifier for the extraction task
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Current status of the task (processing, retrying, completed, failed)
+</ResponseField>
+
+<ResponseField name="results" type="object">
+  Extraction results (when status is "completed")
+</ResponseField>
+
+<ResponseField name="errors" type="string">
+  Error information (when status is "failed")
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET https://api.appliedai.club/api/extractor/v1/extract-status/550e8400-e29b-41d4-a716-446655440000 \
+  -H "Authorization: YOUR_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json JSON Response (Completed)
+{
+  "task_id": "550e8400-e29b-41d4-a716-446655440000",
+  "status": "completed",
+  "total_files": 1,
+  "processed_files": 1,
+  "failed_files": 0,
+  "created_at": "2023-06-15T10:30:00Z",
+  "updated_at": "2023-06-15T10:31:15Z",
+  "results": {
+    "data": {
+      "invoice_number": "INV-2024-001",
+      "total_amount": 1250.00
+    },
+    "confidence": 0.95
+  },
+  "errors": null
+}
+```
+
+```json JSON Response (Failed)
+{
+  "task_id": "550e8400-e29b-41d4-a716-446655440000",
+  "status": "failed",
+  "total_files": 1,
+  "processed_files": 0,
+  "failed_files": 1,
+  "created_at": "2023-06-15T10:30:00Z",
+  "updated_at": "2023-06-15T10:31:15Z",
+  "results": null,
+  "errors": "Document processing failed: Invalid file format"
+}
+```
+</ResponseExample>
+
+## Generate Extraction Schema
+
+<ParamField path="/api/extractor/v1/generate-schema" method="POST">
+  Analyze document and generate an extraction schema.
+</ParamField>
+
+### Features
+- Identifies document type (Invoice, PO, etc.)
+- Generates field schema based on content
+- Supports PDF and images (jpg, jpeg, png)
+- Accepts URL or base64-encoded file content
+- Maximum file size: 10MB
+
+### Request Body
+
+<ParamField body="document_url" type="string">
+  URL of the document to analyze
+</ParamField>
+
+<ParamField body="file_content" type="string">
+  Base64 encoded file content
+</ParamField>
+
+### Response
+
+<ResponseField name="document_type" type="string">
+  Identified document type
+</ResponseField>
+
+<ResponseField name="extraction_schema" type="object">
+  Generated extraction schema
+</ResponseField>
+
+<ResponseField name="confidence" type="number">
+  Confidence score (0.0 to 1.0)
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X POST https://api.appliedai.club/api/extractor/v1/generate-schema \
+  -H "Authorization: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "document_url": "https://example.com/invoice.pdf"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json JSON Response
+{
+  "document_type": "Invoice",
+  "extraction_schema": {
+    "fields": [
+      {
+        "name": "invoice_number",
+        "type": "string",
+        "description": "Invoice identification number",
+        "required": true
+      },
+      {
+        "name": "issue_date",
+        "type": "string",
+        "description": "Date when the invoice was issued",
+        "required": true
+      },
+      {
+        "name": "total_amount",
+        "type": "number",
+        "description": "Total amount to be paid",
+        "required": true
+      }
+    ],
+    "document_description": "Standard invoice document"
+  },
+  "confidence": 0.92
+}
+```
+</ResponseExample>
+
+## Generate Schema Asynchronously
+
+<ParamField path="/api/extractor/v1/generate-schema-async" method="POST">
+  Analyze document and generate an extraction schema asynchronously.
+</ParamField>
+
+### Features
+- Identifies document type (Invoice, PO, etc.)
+- Generates field schema based on content
+- Supports PDF and images (jpg, jpeg, png)
+- Accepts URL or base64-encoded file content
+- Maximum file size: 10MB
+- Returns immediately with a task_id for status tracking
+- Optional callback URL for webhook notification when processing completes
+
+### Request Body
+
+<ParamField body="document_url" type="string">
+  URL of the document to analyze
+</ParamField>
+
+<ParamField body="file_content" type="string">
+  Base64 encoded file content
+</ParamField>
+
+<ParamField body="callback_url" type="string">
+  Optional URL for webhook notification when processing completes
+</ParamField>
+
+### Response
+
+<ResponseField name="task_id" type="string">
+  Unique identifier for the schema generation task
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Current status of the task (processing, completed, failed)
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Status message
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X POST https://api.appliedai.club/api/extractor/v1/generate-schema-async \
+  -H "Authorization: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "document_url": "https://example.com/invoice.pdf"
+    "callback_url": "https://your-server.com/webhook"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json JSON Response
+{
+  "task_id": "550e8400-e29b-41d4-a716-446655440000",
+  "status": "processing",
+  "message": "Task submitted successfully"
+}
+```
+</ResponseExample>
+
+## Check Schema Generation Status
+
+<ParamField path="/api/extractor/v1/generate-schema-status/{task_id}" method="GET">
+  Check the status of an asynchronous schema generation task.
+</ParamField>
+
+### Path Parameters
+
+<ParamField path="task_id" type="string" required>
+  UUID of the schema generation task
+</ParamField>
+
+### Response
+
+<ResponseField name="task_id" type="string">
+  Unique identifier for the schema generation task
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Current status of the task (processing, retrying, completed, failed)
+</ResponseField>
+
+<ResponseField name="results" type="object">
+  Schema generation results (when status is "completed")
+</ResponseField>
+
+<ResponseField name="errors" type="string">
+  Error information (when status is "failed")
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET https://api.appliedai.club/api/extractor/v1/generate-schema-status/550e8400-e29b-41d4-a716-446655440000 \
+  -H "Authorization: YOUR_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json JSON Response (Completed)
+{
+  "task_id": "550e8400-e29b-41d4-a716-446655440000",
+  "status": "completed",
+  "total_files": 1,
+  "processed_files": 1,
+  "failed_files": 0,
+  "created_at": "2023-06-15T10:30:00Z",
+  "updated_at": "2023-06-15T10:31:15Z",
+  "results": {
+    "document_type": "Invoice",
+    "extraction_schema": {
+      "fields": [
+        {
+          "name": "invoice_number",
+          "type": "string",
+          "description": "Invoice identification number",
+          "required": true
+        },
+        {
+          "name": "issue_date",
+          "type": "string",
+          "description": "Date when the invoice was issued",
+          "required": true
+        },
+        {
+          "name": "total_amount",
+          "type": "number",
+          "description": "Total amount to be paid",
+          "required": true
+        }
+      ],
+      "document_description": "Standard invoice document"
+    },
+    "confidence": 0.92
+  },
+  "errors": null
 }
 ```
 </ResponseExample>

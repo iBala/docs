@@ -1,0 +1,793 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "User Research API",
+    "description": "API for evaluating resumes and analyzing job descriptions",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/recruit/v1/evaluate": {
+      "post": {
+        "tags": ["recruit", "Recruit"],
+        "summary": "Evaluate Resume",
+        "description": "Evaluate a resume against job requirements using LLM.\n\nThis endpoint:\n1. Validates the request and authentication\n2. Processes the resume and job details through LLM\n3. Returns structured evaluation results",
+        "operationId": "evaluate_resume_api_recruit_v1_evaluate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkillEvaluation"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Too many requests. Please try again later."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/api/recruit/v1/analyze-job": {
+      "post": {
+        "tags": ["recruit", "Recruit"],
+        "summary": "Analyze Job Description",
+        "description": "Analyze a job description to extract key parameters.\n\nThis endpoint:\n1. Validates the request and authentication\n2. Processes the job description through LLM\n3. Returns structured analysis results including:\n   - Job title\n   - Required skills (2-5)\n   - Interview questions (2-5)",
+        "operationId": "analyze_job_description_api_recruit_v1_analyze_job_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobAnalysisRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobAnalysisResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Too many requests. Please try again later."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/api/recruit/v1/extract-resumes": {
+      "post": {
+        "tags": ["recruit", "Recruit"],
+        "summary": "Extract Resumes",
+        "description": "Extract information from resumes.\n\nThis endpoint:\n1. Validates the request and authentication\n2. Submits documents for asynchronous processing\n3. Returns a job ID for tracking progress",
+        "operationId": "extract_resumes_api_recruit_v1_extract_resumes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResumeExtractionRequest"
+              },
+              "example": {
+                "extraction_schema": {
+                  "fields": [
+                    {
+                      "name": "invoice_number",
+                      "type": "string",
+                      "description": "Invoice number from the document"
+                    },
+                    {
+                      "name": "total_amount",
+                      "type": "number",
+                      "description": "Total amount from the invoice"
+                    }
+                  ],
+                  "document_description": "Invoice document"
+                },
+                "provider": "openai",
+                "document": {
+                  "url": "https://example.com/invoice.pdf"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtractionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Too many requests. Please try again later."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/api/recruit/v1/extraction-status/{job_id}": {
+      "get": {
+        "tags": ["recruit", "Recruit"],
+        "summary": "Get Extraction Status",
+        "description": "Get the status and results of a resume extraction job.",
+        "operationId": "get_extraction_status_api_recruit_v1_extraction_status__job_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtractionResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Too many requests. Please try again later."
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ErrorResponse": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "error_code": {
+            "type": "string",
+            "title": "Error Code"
+          }
+        },
+        "type": "object",
+        "required": ["detail", "error_code"],
+        "title": "ErrorResponse"
+      },
+      "EvaluateRequest": {
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "title": "Job Id"
+          },
+          "application_id": {
+            "type": "string",
+            "title": "Application Id"
+          },
+          "resume_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2083,
+                "minLength": 1,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resume Url"
+          },
+          "job_details": {
+            "$ref": "#/components/schemas/JobDetails"
+          }
+        },
+        "type": "object",
+        "required": ["job_id", "application_id", "job_details"],
+        "title": "EvaluateRequest"
+      },
+      "ExtractionResponse": {
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "title": "Job Id"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Processing started"
+          },
+          "total_documents": {
+            "type": "integer",
+            "title": "Total Documents"
+          }
+        },
+        "type": "object",
+        "required": ["job_id", "total_documents"],
+        "title": "ExtractionResponse",
+        "description": "Response model for extraction job submission"
+      },
+      "ExtractionResult": {
+        "properties": {
+          "successful_extractions": {
+            "items": {
+              "$ref": "#/components/schemas/ResumeDetails"
+            },
+            "type": "array",
+            "title": "Successful Extractions"
+          },
+          "total_processed": {
+            "type": "integer",
+            "title": "Total Processed"
+          },
+          "successful_count": {
+            "type": "integer",
+            "title": "Successful Count"
+          },
+          "failed_count": {
+            "type": "integer",
+            "title": "Failed Count"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": ["successful_extractions", "total_processed", "successful_count", "failed_count", "status"],
+        "title": "ExtractionResult",
+        "description": "Model for extraction results"
+      },
+      "JobAnalysisRequest": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "description_file_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2083,
+                "minLength": 1,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description File Url"
+          }
+        },
+        "type": "object",
+        "title": "JobAnalysisRequest",
+        "description": "Request model for job description analysis"
+      },
+      "JobAnalysisResponse": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "required_skills": {
+            "items": {
+              "$ref": "#/components/schemas/RequiredSkill"
+            },
+            "type": "array",
+            "maxItems": 5,
+            "title": "Required Skills"
+          },
+          "interview_questions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 5,
+            "title": "Interview Questions"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "description_file_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2083,
+                "minLength": 1,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description File Url"
+          }
+        },
+        "type": "object",
+        "title": "JobAnalysisResponse",
+        "description": "Response model for job description analysis"
+      },
+      "JobDetails": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "description_file_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2083,
+                "minLength": 1,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description File Url"
+          },
+          "required_skills": {
+            "items": {
+              "$ref": "#/components/schemas/RequiredSkill"
+            },
+            "type": "array",
+            "title": "Required Skills"
+          }
+        },
+        "type": "object",
+        "required": ["required_skills"],
+        "title": "JobDetails"
+      },
+      "RequiredSkill": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required"
+          }
+        },
+        "type": "object",
+        "required": ["name", "type", "required"],
+        "title": "RequiredSkill"
+      },
+      "ResumeDetails": {
+        "properties": {
+          "application_name": {
+            "type": "string",
+            "title": "Application Name"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "resume_url": {
+            "type": "string",
+            "maxLength": 2083,
+            "minLength": 1,
+            "format": "uri",
+            "title": "Resume Url"
+          }
+        },
+        "type": "object",
+        "required": ["application_name", "resume_url"],
+        "title": "ResumeDetails",
+        "description": "Model for extracted resume details"
+      },
+      "ResumeExtractionRequest": {
+        "properties": {
+          "files": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ResumeFile"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Files"
+          },
+          "urls": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "maxLength": 2083,
+                  "minLength": 1,
+                  "format": "uri"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Urls"
+          }
+        },
+        "type": "object",
+        "title": "ResumeExtractionRequest",
+        "description": "Request model for resume extraction"
+      },
+      "ResumeFile": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type"
+          },
+          "content": {
+            "type": "string",
+            "format": "binary",
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": ["filename", "content_type", "content"],
+        "title": "ResumeFile",
+        "description": "Model for resume file data"
+      },
+      "SkillEvaluation": {
+        "properties": {
+          "skills": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SkillEvaluationDetail"
+            },
+            "type": "object",
+            "title": "Skills"
+          },
+          "evaluation_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Evaluation Date"
+          }
+        },
+        "type": "object",
+        "required": ["skills", "evaluation_date"],
+        "title": "SkillEvaluation"
+      },
+      "SkillEvaluationDetail": {
+        "properties": {
+          "score": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Score"
+          },
+          "evidence": {
+            "type": "string",
+            "title": "Evidence"
+          },
+          "confidence": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Confidence"
+          }
+        },
+        "type": "object",
+        "required": ["score", "evidence", "confidence"],
+        "title": "SkillEvaluationDetail"
+      },
+      "ValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": ["detail"],
+        "title": "ValidationError",
+        "description": "Validation error response schema"
+      }
+    },
+    "securitySchemes": {
+      "APIKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Enter your API key"
+      }
+    }
+  },
+  "security": [
+    {
+      "APIKeyHeader": []
+    }
+  ]
+} 

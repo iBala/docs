@@ -51,7 +51,13 @@
         "applications/user-research/overview",
         "applications/user-research/getting-started",
         "applications/user-research/managing-research",
-        "applications/user-research/best-practices"
+        "applications/user-research/best-practices",
+        {
+          "group": "API Reference",
+          "pages": [
+            "applications/user-research/api-reference/endpoints"
+          ]
+        }
       ]
     },
     {

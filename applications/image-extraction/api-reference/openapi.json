@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Image Extraction API",
-    "description": "Extract structured data from images and PDFs\n\nFor authentication, provide your API key in the Authorization header:\n```\nAuthorization: YOUR_API_KEY\n```\n",
+    "description": "Extract structured data from images and PDFs",
     "version": "1.0.0"
   },
   "paths": {
@@ -10,7 +10,7 @@
       "post": {
         "tags": ["extractor"],
         "summary": "Extract Information from Document",
-        "description": "Extract structured information from documents (PDF or images).\n\n**Features:**\n* Supports PDF and image files (jpg, jpeg, png)\n* Accepts URLs or base64-encoded file content\n* Maximum file size: 10MB\n* Supports both direct schema and template-based extraction\n\n**Input Options:**\n1. Document URL\n2. Base64 encoded file content\n3. Direct extraction schema or template ID",
+        "description": "Extract structured information from documents (PDF or images).\n    \n    **Features:**\n    * Supports PDF and image files (jpg, jpeg, png)\n    * Accepts URLs or base64-encoded file content\n    * Maximum file size: 10MB\n    * Supports both direct schema and template-based extraction\n    \n    **Input Options:**\n    1. Document URL\n    2. Base64 encoded file content\n    3. Direct extraction schema or template ID",
         "operationId": "extract_text_api_extractor_v1_extract_post",
         "requestBody": {
           "content": {
@@ -53,6 +53,514 @@
                 }
               }
             }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "examples": {
+                  "no_document": {
+                    "summary": "No document provided",
+                    "value": {
+                      "detail": "No document provided"
+                    }
+                  },
+                  "invalid_type": {
+                    "summary": "Invalid file type",
+                    "value": {
+                      "detail": "Unsupported file type"
+                    }
+                  },
+                  "file_too_large": {
+                    "summary": "File too large",
+                    "value": {
+                      "detail": "File too large"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/api/extractor/v1/extract-async": {
+      "post": {
+        "tags": ["extractor"],
+        "summary": "Extract Information from Document Asynchronously",
+        "description": "Extract structured information from documents (PDF or images) asynchronously.\n    \n    **Features:**\n    * Supports PDF and image files (jpg, jpeg, png)\n    * Accepts URLs or base64-encoded file content\n    * Maximum file size: 10MB\n    * Supports both direct schema and template-based extraction\n    * Returns immediately with a task_id for status tracking\n    * Optional callback URL for webhook notification when processing completes\n    \n    **Input Options:**\n    1. Document URL\n    2. Base64 encoded file content\n    3. Direct extraction schema or template ID",
+        "operationId": "extract_text_async_api_extractor_v1_extract_async_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AsyncExtractionRequest"
+              },
+              "example": {
+                "extraction_schema": {
+                  "fields": [
+                    {
+                      "name": "invoice_number",
+                      "type": "string",
+                      "description": "Invoice number from the document"
+                    },
+                    {
+                      "name": "total_amount",
+                      "type": "number",
+                      "description": "Total amount from the invoice"
+                    }
+                  ],
+                  "document_description": "Invoice document"
+                },
+                "provider": "openai",
+                "document": {
+                  "url": "https://example.com/invoice.pdf"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncExtractionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error in request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/api/extractor/v1/extract-status/{task_id}": {
+      "get": {
+        "tags": ["extractor"],
+        "summary": "Check Extraction Task Status",
+        "description": "Check the status of an asynchronous extraction task and retrieve results if available.\n    \n    **Status Values:**\n    * PROCESSING: Task is currently being processed\n    * COMPLETED: Task has completed successfully\n    * FAILED: Task has failed\n    \n    When status is COMPLETED, the response will include the extraction results.\n    When status is FAILED, the response will include error information.",
+        "operationId": "get_extraction_status_api_extractor_v1_extract_status__task_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the extraction task",
+              "title": "Task Id"
+            },
+            "description": "UUID of the extraction task"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtractionStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthError"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/extractor/v1/generate-schema": {
+      "post": {
+        "tags": ["extractor"],
+        "summary": "Generate Extraction Schema from Document",
+        "description": "Analyze document and generate an extraction schema.\n    \n    Features:\n    * Identifies document type (Invoice, PO, etc.)\n    * Generates field schema based on content\n    * Supports PDF and images (jpg, jpeg, png)\n    * Accepts URL or base64-encoded file content\n    * Maximum file size: 10MB",
+        "operationId": "generate_schema_api_extractor_v1_generate_schema_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "title": "Request Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchemaGenerationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/api/extractor/v1/generate-schema-async": {
+      "post": {
+        "tags": ["extractor"],
+        "summary": "Generate Extraction Schema from Document Asynchronously",
+        "description": "Analyze document and generate an extraction schema asynchronously.\n    \n    Features:\n    * Identifies document type (Invoice, PO, etc.)\n    * Generates field schema based on content\n    * Supports PDF and images (jpg, jpeg, png)\n    * Accepts URL or base64-encoded file content\n    * Maximum file size: 10MB\n    * Returns immediately with a task_id for status tracking\n    * Optional callback URL for webhook notification when processing completes",
+        "operationId": "generate_schema_async_api_extractor_v1_generate_schema_async_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AsyncSchemaGenerationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncSchemaGenerationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/api/extractor/v1/generate-schema-status/{task_id}": {
+      "get": {
+        "tags": ["extractor"],
+        "summary": "Check Schema Generation Task Status",
+        "description": "Check the status of an asynchronous schema generation task and retrieve results if available.\n    \n    **Status Values:**\n    * PROCESSING: Task is currently being processed\n    * COMPLETED: Task has completed successfully\n    * FAILED: Task has failed\n    \n    When status is COMPLETED, the response will include the schema generation results.\n    When status is FAILED, the response will include error information.",
+        "operationId": "get_schema_generation_status_api_extractor_v1_generate_schema_status__task_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the schema generation task",
+              "title": "Task Id"
+            },
+            "description": "UUID of the schema generation task"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtractionStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthError"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitError"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
           }
         }
       }
@@ -60,22 +568,184 @@
   },
   "components": {
     "schemas": {
-      "ExtractionResponse": {
+      "AsyncExtractionRequest": {
         "properties": {
-          "data": {
-            "type": "object",
-            "title": "Data"
+          "document_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Url"
           },
-          "confidence": {
-            "type": "number",
-            "maximum": 1.0,
-            "minimum": 0.0,
-            "title": "Confidence"
+          "file_content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Content"
+          },
+          "extraction_schema": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extraction Schema"
+          },
+          "template_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Template Id"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LLMProvider"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "document_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Description"
+          },
+          "callback_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Callback Url"
           }
         },
         "type": "object",
-        "required": ["data", "confidence"],
-        "title": "ExtractionResponse"
+        "title": "AsyncExtractionRequest",
+        "description": "Request model for asynchronous extraction"
+      },
+      "AsyncExtractionResponse": {
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BatchProcessingStatus"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_id",
+          "status",
+          "message"
+        ],
+        "title": "AsyncExtractionResponse",
+        "description": "Response model for asynchronous extraction request"
+      },
+      "AsyncSchemaGenerationRequest": {
+        "properties": {
+          "document_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Url"
+          },
+          "file_content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Content"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LLMProvider"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "callback_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Callback Url"
+          }
+        },
+        "type": "object",
+        "title": "AsyncSchemaGenerationRequest",
+        "description": "Request model for asynchronous schema generation"
+      },
+      "AsyncSchemaGenerationResponse": {
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BatchProcessingStatus"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_id",
+          "status",
+          "message"
+        ],
+        "title": "AsyncSchemaGenerationResponse",
+        "description": "Response model for asynchronous schema generation request"
       },
       "AuthError": {
         "properties": {
@@ -90,8 +760,262 @@
           }
         },
         "type": "object",
-        "required": ["detail"],
-        "title": "AuthError"
+        "required": [
+          "detail"
+        ],
+        "title": "AuthError",
+        "description": "Authentication error response schema"
+      },
+      "BatchProcessingStatus": {
+        "type": "string",
+        "enum": [
+          "processing",
+          "retrying",
+          "completed",
+          "failed"
+        ],
+        "title": "BatchProcessingStatus"
+      },
+      "ErrorDetail": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "ErrorDetail",
+        "description": "Standard error response schema"
+      },
+      "ExtractionResponse": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "title": "Data"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "confidence"
+        ],
+        "title": "ExtractionResponse"
+      },
+      "ExtractionSchema": {
+        "properties": {
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/SchemaField"
+            },
+            "type": "array",
+            "title": "Fields"
+          },
+          "document_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fields"
+        ],
+        "title": "ExtractionSchema"
+      },
+      "ExtractionStatusResponse": {
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BatchProcessingStatus"
+          },
+          "total_files": {
+            "type": "integer",
+            "title": "Total Files",
+            "default": 1
+          },
+          "processed_files": {
+            "type": "integer",
+            "title": "Processed Files",
+            "default": 0
+          },
+          "failed_files": {
+            "type": "integer",
+            "title": "Failed Files",
+            "default": 0
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "results": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Results"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_id",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ExtractionStatusResponse",
+        "description": "Response model for extraction status check"
+      },
+      "LLMProvider": {
+        "type": "string",
+        "enum": [
+          "openai",
+          "anthropic",
+          "gemini"
+        ],
+        "title": "LLMProvider"
+      },
+      "RateLimitError": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "retry_after": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retry After"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "RateLimitError",
+        "description": "Rate limit error response schema"
+      },
+      "SchemaField": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "type": {
+            "$ref": "#/components/schemas/SchemaFieldType"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required",
+            "default": false
+          },
+          "isExpanded": {
+            "type": "boolean",
+            "title": "Isexpanded",
+            "default": true
+          },
+          "children": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SchemaField"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Children"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "description"
+        ],
+        "title": "SchemaField"
+      },
+      "SchemaFieldType": {
+        "type": "string",
+        "enum": [
+          "string",
+          "number",
+          "array",
+          "object",
+          "boolean"
+        ],
+        "title": "SchemaFieldType"
+      },
+      "SchemaGenerationResponse": {
+        "properties": {
+          "document_type": {
+            "type": "string",
+            "title": "Document Type"
+          },
+          "extraction_schema": {
+            "$ref": "#/components/schemas/ExtractionSchema"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "document_type",
+          "extraction_schema",
+          "confidence"
+        ],
+        "title": "SchemaGenerationResponse"
       },
       "ValidationError": {
         "properties": {
@@ -104,9 +1028,25 @@
           }
         },
         "type": "object",
-        "required": ["detail"],
-        "title": "ValidationError"
+        "required": [
+          "detail"
+        ],
+        "title": "ValidationError",
+        "description": "Validation error response schema"
+      }
+    },
+    "securitySchemes": {
+      "APIKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Enter your API key"
       }
     }
-  }
+  },
+  "security": [
+    {
+      "APIKeyHeader": []
+    }
+  ]
 } 

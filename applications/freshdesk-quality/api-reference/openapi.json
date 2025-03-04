@@ -5,60 +5,310 @@
     "description": "API for analyzing customer service ticket quality",
     "version": "1.0.0"
   },
-  "servers": [
-    {
-      "url": "https://api.example.com",
-      "description": "Production server"
-    }
-  ],
-  "components": {
-    "securitySchemes": {
-      "ApiKeyAuth": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "Authorization",
-        "description": "API key for authentication"
-      }
-    }
-  },
-  "security": [
-    {
-      "ApiKeyAuth": []
-    }
-  ],
   "paths": {
     "/api/cs-qa/v1/verify": {
       "post": {
-        "summary": "Test Connection",
-        "description": "Test endpoint to verify API connectivity and authentication",
+        "tags": ["cs-qa", "CS QA"],
+        "summary": "Test Endpoint",
+        "description": "A test endpoint that immediately returns success.\nUsed for testing connectivity and authentication.",
+        "operationId": "test_endpoint_api_cs_qa_v1_verify_post",
         "responses": {
           "200": {
-            "description": "Connection successful"
-          }
-        }
-      }
-    },
-    "/api/cs-qa/v1/analyze": {
-      "post": {
-        "summary": "Analyze Tickets",
-        "description": "Analyze a batch of customer service tickets",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AnalyzeRequest"
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Test Endpoint Api Cs Qa V1 Verify Post"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or missing API key",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Invalid API key"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Too many requests. Please try again later."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "example": {
+                  "detail": "Internal server error"
+                }
               }
             }
           }
         },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/api/cs-qa/v1/analyze": {
+      "post": {
+        "tags": ["cs-qa", "CS QA"],
+        "summary": "Analyze Tickets",
+        "description": "Analyze a batch of customer service tickets\n\nThis endpoint:\n1. Validates the API key and gets account_id\n2. Generates a batch_id\n3. Creates a batch record in database\n4. Queues the processing task\n5. Returns the batch_id for tracking\n\nThe actual processing happens asynchronously and results are stored in the database.",
+        "operationId": "analyze_tickets_api_cs_qa_v1_analyze_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchQARequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
-            "description": "Analysis started",
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnalyzeResponse"
+                  "$ref": "#/components/schemas/BatchQAResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or missing API key",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Invalid API key"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Too many requests. Please try again later."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                },
+                "example": {
+                  "detail": "Internal server error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/api/cs-qa/v1/status/{batch_id}": {
+      "get": {
+        "tags": ["cs-qa", "CS QA"],
+        "summary": "Get Batch Status",
+        "description": "Get the status of a batch processing request\n\nReturns:\n- Batch processing status\n- Count of processed and failed tickets\n- Results if processing is complete\n- Errors if any occurred",
+        "operationId": "get_batch_status_api_cs_qa_v1_status__batch_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Batch Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchQAResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or missing API key",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Invalid API key"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Too many requests. Please try again later."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Internal server error"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cs-qa/v1/integration-settings": {
+      "get": {
+        "tags": ["cs-qa", "CS QA"],
+        "summary": "Get Integration Settings",
+        "description": "Fetch integration settings for a specific provider.\n\nThis endpoint:\n1. Validates the API key and gets account_id\n2. Fetches settings from integration_settings table\n3. Returns the settings if found\n\nThe settings are filtered by account_id and provider.",
+        "operationId": "get_integration_settings_api_cs_qa_v1_integration_settings_get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The provider to fetch settings for",
+              "title": "Provider"
+            },
+            "description": "The provider to fetch settings for"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationSettingsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or missing API key",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Invalid API key"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Too many requests. Please try again later."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Internal server error"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
                 }
               }
             }
@@ -66,5 +316,338 @@
         }
       }
     }
-  }
+  },
+  "components": {
+    "schemas": {
+      "BatchProcessingStatus": {
+        "type": "string",
+        "enum": ["processing", "retrying", "completed", "failed"],
+        "title": "BatchProcessingStatus"
+      },
+      "BatchQARequest": {
+        "properties": {
+          "schema_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schema Id"
+          },
+          "tickets": {
+            "items": {
+              "$ref": "#/components/schemas/TicketData"
+            },
+            "type": "array",
+            "title": "Tickets"
+          }
+        },
+        "type": "object",
+        "required": ["tickets"],
+        "title": "BatchQARequest"
+      },
+      "BatchQAResponse": {
+        "properties": {
+          "batch_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Batch Id"
+          },
+          "total_tickets": {
+            "type": "integer",
+            "title": "Total Tickets"
+          },
+          "processed_tickets": {
+            "type": "integer",
+            "title": "Processed Tickets"
+          },
+          "failed_tickets": {
+            "type": "integer",
+            "title": "Failed Tickets"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "pending"
+          },
+          "results": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/QAResult"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Results"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "required": ["batch_id", "total_tickets", "processed_tickets", "failed_tickets"],
+        "title": "BatchQAResponse"
+      },
+      "ConversationMessage": {
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/MessageRole"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "message_text": {
+            "type": "string",
+            "title": "Message Text"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": ["role", "user_id", "message_text", "timestamp"],
+        "title": "ConversationMessage"
+      },
+      "ErrorDetail": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": ["detail"],
+        "title": "ErrorDetail",
+        "description": "Standard error response schema"
+      },
+      "Feedback": {
+        "properties": {
+          "csat_rating": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Csat Rating"
+          },
+          "customer_comments": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Comments"
+          }
+        },
+        "type": "object",
+        "title": "Feedback"
+      },
+      "IntegrationSettingsResponse": {
+        "properties": {
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "settings": {
+            "type": "object",
+            "title": "Settings"
+          }
+        },
+        "type": "object",
+        "required": ["provider", "settings"],
+        "title": "IntegrationSettingsResponse",
+        "description": "Response model for integration settings"
+      },
+      "MessageRole": {
+        "type": "string",
+        "enum": ["customer", "agent"],
+        "title": "MessageRole"
+      },
+      "QAResult": {
+        "properties": {
+          "ticket_id": {
+            "type": "string",
+            "title": "Ticket Id"
+          },
+          "agent_id": {
+            "type": "string",
+            "title": "Agent Id"
+          },
+          "parameter_name": {
+            "type": "string",
+            "title": "Parameter Name"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": ["ticket_id", "agent_id", "parameter_name", "reason"],
+        "title": "QAResult"
+      },
+      "TicketData": {
+        "properties": {
+          "ticket_id": {
+            "type": "string",
+            "title": "Ticket Id"
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "conversation": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ConversationMessage"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation"
+          },
+          "custom_fields": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Fields"
+          },
+          "feedback": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Feedback"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created Timestamp"
+          },
+          "updated_timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated Timestamp"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "priority": {
+            "type": "string",
+            "title": "Priority"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ticket_id",
+          "subject",
+          "description",
+          "created_timestamp",
+          "updated_timestamp",
+          "status",
+          "priority"
+        ],
+        "title": "TicketData"
+      },
+      "ValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": ["detail"],
+        "title": "ValidationError",
+        "description": "Validation error response schema"
+      }
+    },
+    "securitySchemes": {
+      "APIKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Enter your API key"
+      }
+    }
+  },
+  "security": [
+    {
+      "APIKeyHeader": []
+    }
+  ]
 } 
